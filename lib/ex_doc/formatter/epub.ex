@@ -5,6 +5,7 @@ defmodule ExDoc.Formatter.EPUB do
 
   alias ExDoc.Formatter.HTML
   alias ExDoc.Formatter.EPUB.Templates
+  import UUID, only: [uuid4: 1]
 
   @doc """
   Generate EPUB documentation for the given modules
@@ -22,8 +23,9 @@ defmodule ExDoc.Formatter.EPUB do
     exceptions = HTML.filter_list(:exceptions, all)
     protocols = HTML.filter_list(:protocols, all)
 
-    generate_content(output, config, modules, exceptions, protocols)
-    generate_toc(output, config, modules, exceptions, protocols)
+    uuid = uuid4(:urn)
+    generate_content(output, config, modules, exceptions, protocols, uuid)
+    generate_toc(output, config, modules, exceptions, protocols, uuid)
     generate_nav(output, config, modules, exceptions, protocols)
     generate_title(output, config)
     generate_list(output, config, modules)
@@ -63,13 +65,13 @@ defmodule ExDoc.Formatter.EPUB do
     end
   end
 
-  defp generate_content(output, config, modules, exceptions, protocols) do
-    content = Templates.content_template(config, modules ++ exceptions ++ protocols)
+  defp generate_content(output, config, modules, exceptions, protocols, uuid) do
+    content = Templates.content_template(config, modules ++ exceptions ++ protocols, uuid)
     File.write("#{output}/OEBPS/content.opf", content)
   end
 
-  defp generate_toc(output, config, modules, exceptions, protocols) do
-    content = Templates.toc_template(config, modules ++ exceptions ++ protocols)
+  defp generate_toc(output, config, modules, exceptions, protocols, uuid) do
+    content = Templates.toc_template(config, modules ++ exceptions ++ protocols, uuid)
     File.write("#{output}/OEBPS/toc.ncx", content)
   end
 
