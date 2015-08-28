@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package xmlns="http://www.idpf.org/2007/opf"
+         unique-identifier="project-<%= valid_id config.project %>"
+         version="3.0">
+  <metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+    <dc:title><%= config.project %> - <%= config.version %></dc:title>
+    <dc:identifier id="project-<%= valid_id config.project %>"><%= UUID.uuid4(:urn) %></dc:identifier>
+    <dc:language>en-US</dc:language>
+  </metadata>
+  <manifest>
+    <item id="ncx" href="toc.ncx" media-type="application/x-dtbncx+xml"/>
+    <item id="nav" href="nav.html" media-type="application/xhtml+xml" properties="nav"/>
+    <item id="cover" href="title.html" media-type="application/xhtml+xml"/>
+    <%= for node <- nodes do %>
+      <item id="<%= node.id %>" href="modules/<%= node.id %>.html" media-type="application/xhtml+xml"/>
+    <% end %>
+    <item id="css" href="css/stylesheet.css" media-type="text/css"/>
+  </manifest>
+  <spine toc="ncx">
+    <itemref idref="cover" linear="no"/>
+    <itemref idref="nav"/>
+    <%= for node <- nodes do %>
+      <itemref idref="<%= node.id %>"/>
+    <% end %>
+  </spine>
+</package>
