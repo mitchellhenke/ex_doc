@@ -5,6 +5,45 @@ defmodule ExDoc.Formatter.EPUB.Templates do
 
   require EEx
 
+  @content_template_doc """
+  Creates the [Package Document Definition](http://www.idpf.org/epub/30/spec/epub30-publications.html#sec-package-def),
+  this definition encapsulates the publication metadata and the resource
+  information that constitute the EPUB publication. This definition also
+  includes the default reading order.
+  """
+  @detail_template_doc """
+  Returns the details of an individual *function*, *macro* or *callback*.  This
+  function is required used by `module_template/6`.
+  """
+  @module_template_doc """
+  Creates a chapter which contains all the details about an individual module,
+  this chapter can include the following sections: *functions*, *macros*,
+  *types*, *callbacks*.
+  """
+  @nav_template_doc """
+  Creates the table of contents. This template follows the
+  [EPUB Navigation Document Definition](http://www.idpf.org/epub/30/spec/epub30-contentdocs.html#sec-xhtml-nav).
+  """
+  @readme_template_doc """
+  Creates a new chapter when the user provides a `README` file.
+  """
+  @summary_template_doc """
+  Creates a summary of the *functions* and *macros* available for an individual
+  module, this function is required by `module_template/6`.
+  """
+  @title_template_doc """
+  Creates the cover page for the EPUB document.
+  """
+  @toc_template_doc """
+  Creates an *Navigation Center eXtended* document (as defined in OPF 2.0.1),
+  this is for compatibility purposes with EPUB 2 Reading Systems.  EPUB 3
+  Reading Systems must ignore the NCX in favor of the [EPUB Navigation Document](http://www.idpf.org/epub/30/spec/epub30-contentdocs.html#sec-xhtml-nav).
+  """
+  @type_detail_template_doc """
+  Returns all the details of an individual *type*. This function is required by
+  `module_template/6`.
+  """
+
   @doc """
   Generate content from the module template for a given `node`
   """
@@ -71,19 +110,20 @@ defmodule ExDoc.Formatter.EPUB.Templates do
   end
 
   templates = [
-    content_template: [:config, :nodes, :uuid, :datetime, :has_readme],
-    detail_template: [:node, :_module],
-    module_template: [:config, :module, :types, :functions, :macros, :callbacks],
-    nav_template: [:config, :nodes, :has_readme],
-    readme_template: [:config, :content],
-    summary_template: [:node],
-    title_template: [:config],
-    toc_template: [:config, :nodes, :uuid, :has_readme],
-    type_detail_template: [:node]
+    content_template: {[:config, :nodes, :uuid, :datetime, :has_readme], @content_template_doc},
+    detail_template: {[:node, :_module], @detail_template_doc},
+    module_template: {[:config, :module, :types, :functions, :macros, :callbacks], @module_template_doc},
+    nav_template: {[:config, :nodes, :has_readme], @nav_template_doc},
+    readme_template: {[:config, :content], @readme_template_doc},
+    summary_template: {[:node], @summary_template_doc},
+    title_template: {[:config], @title_template_doc},
+    toc_template: {[:config, :nodes, :uuid, :has_readme], @toc_template_doc},
+    type_detail_template: {[:node], @type_detail_template_doc}
   ]
 
-  Enum.each templates, fn({ name, args }) ->
+  Enum.each templates, fn({ name, {args, docs} }) ->
     filename = Path.expand("templates/#{name}.eex", __DIR__)
+    @doc docs
     EEx.function_from_file :def, name, filename, args
   end
 end
