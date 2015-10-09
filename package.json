@@ -65,6 +65,7 @@
     "lodash": "^3.10.1",
     "lodash.find": "^3.2.1",
     "lodash.findkey": "^3.0.1",
+    "lunr": "^0.5.12",
     "mocha": "^2.2.5",
     "normalize.css": "^3.0.3",
     "pre-commit": "^1.1.1",

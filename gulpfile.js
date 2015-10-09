@@ -13,6 +13,7 @@ var LessPluginAutoPrefix = require('less-plugin-autoprefix')
 var Server = require('karma').Server
 var webpack = require('webpack-stream')
 var exec = require('child_process').exec
+var lunr = require('lunr');
 
 var config = require('./assets/webpack.config')
 
@@ -21,7 +22,7 @@ var config = require('./assets/webpack.config')
 
 // Set variable via $ gulp --type production
 var environment = $.util.env.type || 'development'
-var isProduction = environment === 'production'
+var isProduction = false //environment === 'production'
 
 var distPath = 'lib/ex_doc/formatter/html/templates/dist'
 
@@ -139,6 +140,9 @@ gulp.task('development', function (done) {
     ['javascript-watch', 'less-watch'],
     done
   )
+})
+
+gulp.task('search_index', function () {
 })
 
 gulp.task('default', ['lint', 'test'])

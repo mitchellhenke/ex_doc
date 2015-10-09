@@ -25,7 +25,7 @@ var loaders = [{
 module.exports = {
   development: {
     debug: true,
-    devtool: 'eval-source-map',
+    devtool: 'source-map',
     output: output,
     module: {
       loaders: loaders

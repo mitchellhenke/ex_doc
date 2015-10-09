@@ -2,12 +2,14 @@
 // ------------
 
 import $ from 'jquery'
+import lunr from 'lunr'
 import hljs from 'highlight.js/build/highlight.pack'
 
 import {initialize as initEvents} from './events'
 import {initialize as initSidebar} from './sidebar'
 
 window.$ = $
+window.lunr = lunr
 
 $(() => {
   // Setup Highlight.js

@@ -7,6 +7,7 @@
 // ------------
 
 import $ from 'jquery'
+import lunr from 'lunr'
 import * as helpers from './helpers'
 
 import resultsTemplate from './templates/search-results.handlebars'
@@ -74,10 +75,99 @@ export function findIn (elements, matcher) {
   }).filter(cleaner)
 }
 
+function ngram(len) {
+  return function(obj) {
+    if (!arguments.length || obj == null || obj == undefined) return []
+    if (Array.isArray(obj)) return obj.map(function (t) { return t.toLowerCase() })
+
+    var str = "\u0002" + obj.toString() + '\u0003';
+
+    if (str.length <= len) {
+      return [str.toLowerCase()];
+    } else {
+      var buffer = [];
+      for (var i = 0; i <= str.length - len; i++) {
+        buffer.push(str.slice(i, i + len).toLowerCase());
+      }
+      return buffer;
+    }
+  }
+}
+
+function index(elements) {
+  lunr.tokenizer = ngram(3)
+  var idx = lunr(function () {
+    this.field('title')
+    this.field('anchor')
+    this.tokenizer = ngram(3)
+  })
+
+  $.each(elements, function(x) {
+    var functions = x.functions || []
+    var macros = x.macros || []
+    var callbacks = x.callbacks || []
+
+    $.each(functions, function(y) {
+      idx.add(y)
+    })
+    $.each(macros, function(y) {
+      idx.add(y)
+    })
+    $.each(callbacks, function(y) {
+      idx.add(y)
+    })
+  })
+
+  return idx
+}
+
+function resultsFindIn(elements, ids) {
+  var results = []
+
+  elements.forEach(function(x) {
+    var functions = x.functions || []
+    var macros = x.macros || []
+    var callbacks = x.callbacks || []
+
+    var things = functions.filter(function(y) {
+      $.inArray(y.id, ids)
+    })
+
+    results = results.concat(things)
+
+  })
+
+  return results
+}
+
 function search (nodes, value) {
   var safeVal = new RegExp(helpers.escapeText(value), 'i')
 
   var levels = []
+  var names = []
+  $.each(nodes.modules, function(index, x)
+      { names.push({"title": x.id, "id": index, "_id": x.index}) }
+  )
+  var modules_idx = index(nodes.modules)
+  var exceptions_idx = index(nodes.exceptions)
+  var protocols_idx = index(nodes.protocols)
+
+  var modules_results = modules_idx.search(value).map(function(x) { return x.ref })
+  var exceptions_results = exceptions_idx.search(value).map(function(x) { return x.ref })
+  var protocols_results = protocols_idx.search(value).map(function(x) { return x.ref })
+
+  var no = resultsFindIn(nodes.modules, modules_results)
+  var yes = resultsFindIn(nodes.exceptions, exceptions_results)
+  var wow = resultsFindIn(nodes.protocols, protocols_results)
+
+  // var modules = results.map(function(x) {
+  //   var element = nodes.modules[parseInt(x.ref)]
+
+  //   return {
+  //     id: element.id,
+  //     match: idMatch ? highlight(idMatch) : element.id
+  //   }
+  // })
 
   var modules = findIn(nodes.modules, safeVal)
   var exceptions = findIn(nodes.exceptions, safeVal)
